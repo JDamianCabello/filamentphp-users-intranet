@@ -6,7 +6,9 @@ use App\Filament\Resources\HolidayResource;
 use App\Mail\HolidayApproved;
 use App\Mail\HolidayRejected;
 use App\Models\User;
+use Carbon\Carbon;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Mail;
@@ -35,6 +37,13 @@ class EditHoliday extends EditRecord
             ];
 
             Mail::to($record->user->email)->send(new HolidayApproved($dataToSend));
+
+            $formattedDate = Carbon::parse($data['day'])->format('Y-m-d');
+            Notification::make()
+                ->title('Solicitud de vacaciones APROBADA')
+                ->body("El día {$formattedDate} está aprobado.")
+                ->success()
+                ->sendToDatabase($user);
         }
 
         if ($record->status === 'rejected') {
@@ -46,6 +55,13 @@ class EditHoliday extends EditRecord
             ];
 
             Mail::to($user->email)->send(new HolidayRejected($dataToSend));
+
+            $formattedDate = Carbon::parse($data['day'])->format('Y-m-d');
+            Notification::make()
+                ->title('Solicitud de vacaciones RECHAZADA')
+                ->body("El día {$formattedDate} está rechazado.")
+                ->danger()
+                ->sendToDatabase($user);
         }
 
         return $record;

@@ -6,6 +6,8 @@ use App\Filament\AreaPersonal\Resources\HolidayResource;
 use App\Mail\HolidayPending;
 use App\Models\Calendar;
 use App\Models\User;
+use Carbon\Carbon;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -32,6 +34,12 @@ class CreateHoliday extends CreateRecord
 
         Mail::to($adminUser->email)->send(new HolidayPending($dataToSend));
 
+        $formattedDate = Carbon::parse($data['day'])->format('Y-m-d');
+        $recipient = auth()->user();
+        Notification::make()
+            ->title('Solicitud de vacaciones enviada')
+            ->body("El día {$formattedDate} está pendiente de aprobación.")
+            ->sendToDatabase($recipient);
         return $data;
     }
 
