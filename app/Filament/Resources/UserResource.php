@@ -138,6 +138,8 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Nombre')
+                    ->getStateUsing(fn ($record) => $record->first_name . ' ' . $record->last_name)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
